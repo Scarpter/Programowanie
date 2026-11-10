@@ -1,0 +1,14 @@
+[build-sysytem]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = 'Data Oriented Programming'
+version='0.1'
+desription = 'Examples for the programming course'
+requires-python = ">=3.11"
+dependencies= ["jupyter", "jupytext", "numpy", "pandas", "matplotlib"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+package-dir = {"" = "src"}
