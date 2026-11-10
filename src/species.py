@@ -1,43 +1,60 @@
-from dataclasses import dataclass
-import matplotlib.pyplot as plt
+"""Module with definitions of considered species"""
+import random
 
-from .species import Creature
+class Creature:
 
+    alive: bool = True
 
-@dataclass
-class HistoryElement:
-    prey: int
-    predators: int
+    def __init__(self, p_death: float, p_reproduce: float):
+        self.p_death = p_death
+        self.p_reproduce = p_reproduce
 
-class Population:
+    def kill(self):
+        """Kills (i.e. alive=False) the creature with probability p_death"""
+        if random.random() < self.p_death:
+            self.alive = False
 
-    _instances: set[Creature]  # Tu będą dwa zbiory (Prey & Predator)
-    history: list[int]  # list[HistoryElement]
+    def reproduce(self):
+        """Returns new instance of Creature with probability p_reproduce (otherwise None)"""
 
-    def __init__(self, n: int, **kwargs):
+        if self.alive and (random.random() < self.p_reproduce):
 
-        self._instances = set(
-            [Creature(**kwargs) for _ in range(n)]
-        )
+            # 1. Consider changing p_death, p_reproduce to have instances different from the parent
+            return self.__class__(p_death=self.p_death, p_reproduce=self.p_reproduce)
 
-        self.history = [self.n]
+        return None
 
-    def natural_selection(self):
+    # TODO: Implement it as descriptors
+    @property
+    def p_death(self):
 
-        for creature in self._instances:
-            creature.kill()
+        return self.__p_death
 
-        self._instances = set([creature for creature in self._instances if creature.alive])
+    @p_death.setter
+    def p_death(self, value):
 
-        self.history.append(self.n)
+        # Makes sure that 0 <= value <= 1
+        value = min(1.0, max(0.0, value))
 
-    def plot_history(self):
-        plt.plot(self.history)
-        plt.xlabel("Pokolenie")
-        plt.ylabel("Liczebność populacji")
-        plt.title("Historia populacji")
-        plt.show()
+        self.__p_death = value
 
     @property
-    def n(self):
-        return len(self._instances)
+    def p_reproduce(self):
+
+        return self.__p_reproduce
+
+    @p_reproduce.setter
+    def p_reproduce(self, value):
+
+        # Makes sure that 0 <= value <= 1
+        value = min(1.0, max(0.0, value))
+
+        self.__p_reproduce = value
+
+
+class Prey(Creature):
+    pass
+
+
+class Predator(Creature):
+    pass
