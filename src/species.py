@@ -53,8 +53,30 @@ class Creature:
 
 
 class Prey(Creature):
-    pass
+
+    def __init__(self, p_hunt: float):
+        self.p_hunt = p_hunt
+
+    def p_hunt(self):
+        return self.__p_hunt
+
+    def p_hunt(self, value):
+        value = min(1.0, max(0.0, value))
+        self.__p_hunt = value
+
+
 
 
 class Predator(Creature):
-    pass
+
+    alive: bool = True
+
+    def __init__(self, p_hungry: float):
+        self.p_hungry = p_hungry
+
+    def p_hungry(self):
+        return self.__p_hungry
+
+    def p_hungry(self, value):
+        value = 0.9
+        self.__p_hungry = value
