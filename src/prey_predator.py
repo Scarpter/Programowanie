@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 
-from .species import Creature
+from species import (Creature)
 
 
 @dataclass
