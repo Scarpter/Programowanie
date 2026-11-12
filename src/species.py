@@ -17,66 +17,57 @@ class Creature:
     def reproduce(self):
         """Returns new instance of Creature with probability p_reproduce (otherwise None)"""
 
-        if self.alive and (random.random() < self.p_reproduce):
+        if self.alive and random.random() < self.p_reproduce:
 
             # 1. Consider changing p_death, p_reproduce to have instances different from the parent
             return self.__class__(p_death=self.p_death, p_reproduce=self.p_reproduce)
 
         return None
 
-    # TODO: Implement it as descriptors
-    @property
-    def p_death(self):
-
-        return self.__p_death
-
-    @p_death.setter
-    def p_death(self, value):
-
-        # Makes sure that 0 <= value <= 1
-        value = min(1.0, max(0.0, value))
-
-        self.__p_death = value
-
-    @property
-    def p_reproduce(self):
-
-        return self.__p_reproduce
-
-    @p_reproduce.setter
-    def p_reproduce(self, value):
-
-        # Makes sure that 0 <= value <= 1
-        value = min(1.0, max(0.0, value))
-
-        self.__p_reproduce = value
 
 
 class Prey(Creature):
 
-    def __init__(self, p_hunt: float):
+    p_hunt = 0.2
+    def __init__(self, p_death , p_reproduce,
+                 p_hunt: float = 0.2):
+        super().__init__(p_death, p_reproduce)
         self.p_hunt = p_hunt
 
-    def p_hunt(self):
-        return self.__p_hunt
-
-    def p_hunt(self, value):
-        value = min(1.0, max(0.0, value))
-        self.__p_hunt = value
+    def reproduce(self):
+        if self.alive and random.random() < self.p_reproduce:
+            return Prey(p_death=self.p_death,
+                        p_reproduce=self.p_reproduce,
+                        p_hunt=self.p_hunt)
+        return None
 
 
 
 
 class Predator(Creature):
 
-    alive: bool = True
+    p_death_hungry = 0.9
 
-    def __init__(self, p_hungry: float):
-        self.p_hungry = p_hungry
+    def __init__(self, p_death , p_reproduce):
+        super().__init__(p_death, p_reproduce)
+        self.hungry = True
 
-    def p_hungry(self):
-        return self.__p_hungry
+    def kill(self):
 
-    def p_hungry(self, value):
-        value = 0.9
-        self.__p_hungry = value
+        p = self.p_death_hungry if self.hungry else self.p_death
+        if random.random() < p:
+            self.alive = False
+
+    def hunt(self, prey: Prey):
+
+        if not self.alive or not prey.alive:
+            return
+        if random.random() < prey.p_hunt:
+            prey.alive = False
+            self.hungry = False
+
+    def reproduce(self):
+        if self.alive and random.random() < self.p_reproduce:
+            return Predator(p_death=self.p_death,
+                            p_reproduce=self.p_reproduce)
+        return None
