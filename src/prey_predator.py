@@ -11,19 +11,15 @@ class HistoryElement:
 
 class Population:
 
-    def __init__(self, population_data: dict):
-
+    def __init__(self, population_data: dict, **species_params):
+        """population_data: {klasa: liczba}
+           species_params: {klasa: {nazwa_parametru: wartość}} – opcjonalne nadpisania."""
         self._instances: set[Creature] = set()
         for cls, n in population_data.items():
+            params = species_params.get(cls, {})
             for _ in range(n):
-                if cls is Prey:
-                    self._instances.add(Prey())
-                elif cls is Predator:
-                    self._instances.add(Predator())
-                else:
-                    self._instances.add(cls())
-
-        self.history: list[HistoryElement] = [self._count()]
+                self._instances.add(cls(**params))
+        self.history = [self._count()]
 
     def _count(self) -> HistoryElement:
         prey = sum(1 for c in self._instances if isinstance(c, Prey))
@@ -34,7 +30,7 @@ class Population:
     def n(self) -> HistoryElement:
         return self._count()
 
-    def hunting(self, other):
+    def hunting(self):
         predators = [c for c in self._instances
                      if isinstance(c, Predator) and c.alive]
         preys = [c for c in self._instances
@@ -63,8 +59,29 @@ class Population:
         self.history.append(self._count())
 
     def plot_history(self):
-        plt.plot(self.history)
-        plt.xlabel("Pokolenie")
-        plt.ylabel("Liczebność populacji")
+        steps = range(len(self.history))
+        prey = [h.prey for h in self.history]
+        pred = [h.predators for h in self.history]
+
+        plt.plot(steps, prey, label="Prey")
+        plt.plot(steps, pred, label="Predator")
+        plt.xlabel("Krok symulacji")
+        plt.ylabel("Liczebność")
         plt.title("Historia populacji")
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.show()
+
+    def plot_histogram(self, attr: str):
+        """Histogram wartości atrybutu (np. 'p_reproduce') dla aktualnej populacji."""
+        values = [getattr(c, attr) for c in self._instances
+                  if hasattr(c, attr)]
+        if not values:
+            print(f"Brak osobników z atrybutem '{attr}'.")
+            return
+        plt.hist(values, bins=10, edgecolor="black")
+        plt.xlabel(attr)
+        plt.ylabel("Liczba osobników")
+        plt.title(f"Histogram atrybutu '{attr}'")
+        plt.grid(True, alpha=0.3)
         plt.show()
