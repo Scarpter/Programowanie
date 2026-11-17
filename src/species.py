@@ -42,7 +42,7 @@ class Creature:
 class Prey(Creature):
     """Ofiara – dodatkowe p_hunt (szansa przeżycia polowania)."""
 
-    def __init__(self, p_death=None, p_reproduce=None, p_hunt=0.25):
+    def __init__(self, p_death=None, p_reproduce=None, p_hunt=0.3):
         super().__init__(p_death, p_reproduce)
         self.p_hunt = p_hunt
 
@@ -59,7 +59,7 @@ class Prey(Creature):
 class Predator(Creature):
     """Drapieżca – stan 'hungry' i metoda hunt(prey)."""
 
-    p_death_hungry = 0.5
+    p_death_hungry = 0.6
 
     def __init__(self, p_death=None, p_reproduce=None):
         super().__init__(p_death, p_reproduce)
