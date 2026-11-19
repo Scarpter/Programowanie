@@ -6,22 +6,23 @@ from species import Creature, Prey, Predator
 
 @dataclass
 class HistoryElement:
+    """Struktura przechowująca stan populacji w jednym kroku symulacji."""
     prey: int
     predators: int
 
 class Population:
 
-    def __init__(self, population_data: dict, **species_params):
-        """population_data: {klasa: liczba}
-           species_params: {klasa: {nazwa_parametru: wartość}} – opcjonalne nadpisania."""
-        self._instances: set[Creature] = set()
+    def __init__(self, population_data: dict):
+        #population_data: {klasa: liczba}
+        self._instances: list[Creature] = []
+        #Przechowanie w liście bo inaczej seed nie działa
         for cls, n in population_data.items():
-            params = species_params.get(cls, {})
             for _ in range(n):
-                self._instances.add(cls(**params))
+                self._instances.append(cls())
         self.history = [self._count()]
 
     def _count(self) -> HistoryElement:
+        #Zlicza osobniki każdego gatunku i zwraca je jako HistoryElement
         prey = sum(1 for c in self._instances if isinstance(c, Prey))
         pred = sum(1 for c in self._instances if isinstance(c, Predator))
         return HistoryElement(prey=prey, predators=pred)
@@ -31,6 +32,8 @@ class Population:
         return self._count()
 
     def hunting(self):
+        #Polowanie poprzez stworzenie listy żywych drapieżników i ofiar, a następnie
+        #parowanie ich 1:1
         predators = [c for c in self._instances
                      if isinstance(c, Predator) and c.alive]
         preys = [c for c in self._instances
@@ -40,8 +43,9 @@ class Population:
 
 
     def natural_selection(self):
+        #Funkcja przeprowadza jeden krok stymulacji
         newborns = []
-
+        #  Reprodukcja wszystkich żyjących organizmów
         for creature in list(self._instances):
             if creature.alive:
                 child = creature.reproduce()
@@ -53,12 +57,16 @@ class Population:
         for creature in list(self._instances):
             if creature.alive:
                 creature.kill()
-
-        self._instances = {c for c in self._instances if c.alive}
-        self._instances.update(newborns)
+        #Aktualizacja zbioru żyjących organizmów i reset głodu
+        self._instances = [c for c in self._instances if c.alive]
+        for c in self._instances:
+            if isinstance(c, Predator):
+                c.hungry = True
+        self._instances.extend(newborns)
         self.history.append(self._count())
 
     def plot_history(self):
+        #Tworzenie wykresu
         steps = range(len(self.history))
         prey = [h.prey for h in self.history]
         pred = [h.predators for h in self.history]
@@ -73,7 +81,7 @@ class Population:
         plt.show()
 
     def plot_histogram(self, attr: str):
-        """Histogram wartości atrybutu (np. 'p_reproduce') dla aktualnej populacji."""
+        #Histogram wartości atrybutu (np. 'p_reproduce') dla aktualnej populacji.
         values = [getattr(c, attr) for c in self._instances
                   if hasattr(c, attr)]
         if not values:

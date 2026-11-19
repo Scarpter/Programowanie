@@ -1,9 +1,7 @@
-"""Module with definitions of considered species."""
 import random
 
-
 class Creature:
-    """Abstrakcyjny organizm z rozrodem i śmiertelnością."""
+    #Abstrakcyjny organizm z rozmnażaniem i śmiertelnością.
 
     p_death = 0.1
     p_reproduce = 0.2
@@ -19,18 +17,18 @@ class Creature:
         self.alive = True
 
     def __setattr__(self, name, value):
-        """Ścina prawdopodobieństwa do [0, 1] – walidator §2B."""
+        #Ścina prawdopodobieństwa do [0, 1] .
         if name in self._probability_attrs:
             value = min(1.0, max(0.0, float(value)))
         super().__setattr__(name, value)
 
     def kill(self):
-        """Zabija organizm z prawdopodobieństwem p_death."""
+        #Zabija organizm z prawdopodobieństwem p_death.
         if random.random() < self.p_death:
             self.alive = False
 
     def reproduce(self):
-        """Z prawdopodobieństwem p_reproduce zwraca nowego osobnika."""
+        #Z prawdopodobieństwem p_reproduce zwraca nowy organizm.
         if self.alive and random.random() < self.p_reproduce:
             return self.__class__(
                 p_death=self.p_death,
@@ -40,11 +38,11 @@ class Creature:
 
 
 class Prey(Creature):
-    """Ofiara – dodatkowe p_hunt (szansa przeżycia polowania)."""
-
-    def __init__(self, p_death=None, p_reproduce=None, p_hunt=0.3):
+    #Ofiara – dodatkowe p_hunt czyli szansa przeżycia polowania.
+    def __init__(self, p_death=None, p_reproduce=None, p_hunt=None):
         super().__init__(p_death, p_reproduce)
-        self.p_hunt = p_hunt
+        if p_hunt is not None:
+            self.p_hunt = p_hunt
 
     def reproduce(self):
         if self.alive and random.random() < self.p_reproduce:
@@ -57,7 +55,7 @@ class Prey(Creature):
 
 
 class Predator(Creature):
-    """Drapieżca – stan 'hungry' i metoda hunt(prey)."""
+    #Drapieżnik – stan hungry i hunt(prey).
 
     p_death_hungry = 0.6
 
@@ -71,6 +69,7 @@ class Predator(Creature):
             self.alive = False
 
     def hunt(self, prey: Prey):
+        #Drapieżnik poluje na ofiarę
         if not self.alive or not prey.alive:
             return
         if random.random() < prey.p_hunt:
